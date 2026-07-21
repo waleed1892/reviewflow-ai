@@ -1,21 +1,26 @@
 {
-  "name": "reviewflow-ai",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "private": true,
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "Waleed Zahid",
-  "license": "GPL-3.0-only",
-  "packageManager": "pnpm@10.10.0",
-  "devDependencies": {
-    "turbo": "^2.10.5"
-  },
-  "engines": {
-    "node": ">=22.23.1",
-     "pnpm": ">=10.10.0"
-  }
+	"name": "reviewflow-ai",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"private": true,
+	"scripts": {
+		"format-and-lint": "biome check .",
+		"format-and-lint:fix": "biome check . --write",
+		"lint:staged": "biome check --staged",
+		"prepare": "husky"
+	},
+	"keywords": [],
+	"author": "Waleed Zahid",
+	"license": "GPL-3.0-only",
+	"packageManager": "pnpm@10.10.0",
+	"devDependencies": {
+		"@biomejs/biome": "2.5.5",
+		"husky": "^9.1.7",
+		"turbo": "^2.10.5"
+	},
+	"engines": {
+		"node": ">=22.23.1",
+		"pnpm": ">=10.10.0"
+	}
 }
