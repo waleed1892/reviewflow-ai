@@ -1,0 +1,26 @@
+{
+	"name": "@reviewflow/api",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"dev": "tsx watch src/index.ts",
+		"build": "tsc",
+		"start": "node dist/index.js",
+		"typecheck": "tsc --noEmit"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "GPL-3.0-only",
+	"packageManager": "pnpm@10.10.0",
+	"dependencies": {
+		"express": "^5.2.1"
+	},
+	"devDependencies": {
+		"@types/express": "^5.0.6",
+		"@types/node": "^26.1.1",
+		"tsx": "^4.23.1",
+		"typescript": "^7.0.2"
+	}
+}
