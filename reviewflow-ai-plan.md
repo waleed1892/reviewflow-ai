@@ -126,6 +126,9 @@ Define a narrow workflow and make architectural choices before building UI pages
 - [ ] Design the initial data model: organizations, memberships, documents, versions, extracted changes, review tasks, comments, and audit events.
 - [ ] Create basic wireframes for dashboard, upload, comparison, and review screens.
 - [ ] Create an architecture diagram.
+- [ ] Design the main API endpoints before coding (resources, routes, methods, request/response shapes).
+- [ ] Define error strategy (how errors flow through the system: error types, status codes, structured error responses, service vs controller error handling).
+- [ ] Define testing approach (what to unit test vs integration test vs E2E test; test pyramid for this project).
 - [ ] Add initial ADRs:
   - [ ] Why Next.js + NestJS
   - [ ] Why PostgreSQL + pgvector

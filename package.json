@@ -7,7 +7,7 @@
 	"scripts": {
 		"format-and-lint": "biome check .",
 		"format-and-lint:fix": "biome check . --write",
-		"lint:staged": "biome check --staged",
+		"lint:staged": "biome check --staged --no-errors-on-unmatched",
 		"prepare": "husky"
 	},
 	"keywords": [],
