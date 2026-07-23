@@ -3,8 +3,10 @@ import dotenv from "dotenv";
 import express from "express";
 import helmet from "helmet";
 import { StatusCodes } from "http-status-codes";
+import { pinoHttp } from "pino-http";
 import { globalErrorHandler } from "./middleware/error-handler.js";
 import { globalRateLimiter } from "./middleware/rate-limitter.js";
+import { logger } from "./utils/logger.js";
 
 dotenv.config();
 
@@ -18,6 +20,9 @@ app.use(
 		origin: process.env.ALLOWED_ORIGINS || "http://localhost:3000",
 	}),
 );
+
+app.use(pinoHttp({ logger }));
+
 app.use(express.json());
 app.use(
 	express.urlencoded({
