@@ -1,3 +1,4 @@
+import { prisma } from "@reviewflow/database";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
@@ -31,13 +32,16 @@ app.use(
 );
 app.use(globalRateLimiter);
 
-app.get(`/api/health`, (_, res) => {
+app.get(`/api/health`, async (_, res) => {
+	const userCount = await prisma.user.count();
 	res.status(StatusCodes.OK).json({
 		status: "UP",
 		uptime: process.uptime(),
 		timestamp: new Date(),
 		memory: process.memoryUsage(),
 		message: "Server is running normally",
+		database: "Connected",
+		userCount: userCount,
 	});
 });
 

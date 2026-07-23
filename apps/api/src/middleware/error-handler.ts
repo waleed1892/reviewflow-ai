@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { isHttpError } from "http-errors";
 import { StatusCodes } from "http-status-codes";
 import { logger } from "@/utils/logger";
@@ -7,6 +7,7 @@ export const globalErrorHandler = (
 	err: Error,
 	_req: Request,
 	res: Response,
+	_next: NextFunction,
 ) => {
 	if (isHttpError(err)) {
 		return res.status(err.statusCode).json({
