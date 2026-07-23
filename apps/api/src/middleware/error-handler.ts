@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { isHttpError } from "http-errors";
 import { StatusCodes } from "http-status-codes";
-import { logger } from "@/utils/logger.js";
+import { logger } from "@/utils/logger";
 
 export const globalErrorHandler = (
 	err: Error,

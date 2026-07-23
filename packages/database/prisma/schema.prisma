@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  REVIEWER
+  MEMBER
+}
+
+model User {
+  id           String               @id @default(uuid())
+  email        String               @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime             @db.Timestamptz()
+  updatedAt    DateTime             @updatedAt
+  memberships  OrgainzationMember[]
+
+  @@map("users")
+}
+
+model Organization {
+  id        String               @id @default(uuid())
+  name      String
+  slug      String               @unique
+  createdAt DateTime             @db.Timestamptz()
+  updatedAt DateTime             @updatedAt
+  members   OrgainzationMember[]
+  documents Document[]
+
+  @@map("organizations")
+}
+
+model OrgainzationMember {
+  id             String   @id @default(uuid())
+  userId         String
+  organizationId String
+  role           Role
+  createdAt      DateTime @db.Timestamptz()
+  updatedAt      DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+  @@map("organization_members")
+}
+
+enum DocumentStatus {
+  UPLOADED
+  QUEUED
+  PROCESSING
+  READY
+  FAILED
+}
+
+model Document {
+  id             String         @id @default(uuid())
+  title          String
+  status         DocumentStatus
+  organizationId String
+  createdAt      DateTime       @db.Timestamptz()
+  updatedAt      DateTime       @updatedAt
+
+  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  documentVersions DocumentVersion[]
+
+  @@index([organizationId])
+  @@map("documents")
+}
+
+model DocumentVersion {
+  id            String   @id @default(uuid())
+  documentId    String
+  versionNumber Int
+  storagePath   String
+  sizeBytes     BigInt
+  mimeType      String
+  createdAt     DateTime @db.Timestamptz()
+  updatedAt     DateTime @updatedAt
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, id])
+  @@map("document_versions")
+}

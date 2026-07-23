@@ -4,9 +4,9 @@ import express from "express";
 import helmet from "helmet";
 import { StatusCodes } from "http-status-codes";
 import { pinoHttp } from "pino-http";
-import { globalErrorHandler } from "@/middleware/error-handler.js";
-import { globalRateLimiter } from "@/middleware/rate-limitter.js";
-import { logger } from "@/utils/logger.js";
+import { globalErrorHandler } from "@/middleware/error-handler";
+import { globalRateLimiter } from "@/middleware/rate-limitter";
+import { logger } from "@/utils/logger";
 
 dotenv.config();
 
