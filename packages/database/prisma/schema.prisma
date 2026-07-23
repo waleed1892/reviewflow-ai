@@ -22,10 +22,10 @@ enum Role {
 model User {
   id           String               @id @default(uuid())
   email        String               @unique
-  passwordHash String
+  passwordHash String               @map("password_hash")
   name         String
-  createdAt    DateTime             @db.Timestamptz()
-  updatedAt    DateTime             @updatedAt
+  createdAt    DateTime             @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime             @updatedAt @map("updated_at")
   memberships  OrgainzationMember[]
 
   @@map("users")
@@ -35,8 +35,8 @@ model Organization {
   id        String               @id @default(uuid())
   name      String
   slug      String               @unique
-  createdAt DateTime             @db.Timestamptz()
-  updatedAt DateTime             @updatedAt
+  createdAt DateTime             @map("created_at") @db.Timestamptz()
+  updatedAt DateTime             @updatedAt @map("updated_at")
   members   OrgainzationMember[]
   documents Document[]
 
@@ -45,11 +45,11 @@ model Organization {
 
 model OrgainzationMember {
   id             String   @id @default(uuid())
-  userId         String
-  organizationId String
+  userId         String   @map("user_id")
+  organizationId String   @map("organization_id")
   role           Role
-  createdAt      DateTime @db.Timestamptz()
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime @map("created_at") @db.Timestamptz()
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -71,9 +71,9 @@ model Document {
   id             String         @id @default(uuid())
   title          String
   status         DocumentStatus
-  organizationId String
-  createdAt      DateTime       @db.Timestamptz()
-  updatedAt      DateTime       @updatedAt
+  organizationId String         @map("organization_id")
+  createdAt      DateTime       @map("created_at") @db.Timestamptz()
+  updatedAt      DateTime       @updatedAt @map("updated_at")
 
   organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   documentVersions DocumentVersion[]
@@ -84,13 +84,13 @@ model Document {
 
 model DocumentVersion {
   id            String   @id @default(uuid())
-  documentId    String
-  versionNumber Int
-  storagePath   String
-  sizeBytes     BigInt
-  mimeType      String
-  createdAt     DateTime @db.Timestamptz()
-  updatedAt     DateTime @updatedAt
+  documentId    String   @map("document_id")
+  versionNumber Int      @map("version_number")
+  storagePath   String   @map("storage_path")
+  sizeBytes     BigInt   @map("size_bytes")
+  mimeType      String   @map("mime_type")
+  createdAt     DateTime @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
