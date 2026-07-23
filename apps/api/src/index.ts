@@ -1,6 +1,5 @@
 import { prisma } from "@reviewflow/database";
 import cors from "cors";
-import dotenv from "dotenv";
 import express from "express";
 import helmet from "helmet";
 import { StatusCodes } from "http-status-codes";
@@ -8,17 +7,16 @@ import { pinoHttp } from "pino-http";
 import { globalErrorHandler } from "@/middleware/error-handler";
 import { globalRateLimiter } from "@/middleware/rate-limitter";
 import { logger } from "@/utils/logger";
-
-dotenv.config();
+import { env } from "./utils/env";
 
 const app = express();
 
-const port = process.env.PORT || "3001";
+const port = env.PORT;
 
 app.use(helmet());
 app.use(
 	cors({
-		origin: process.env.ALLOWED_ORIGINS || "http://localhost:3000",
+		origin: env.ALLOWED_ORIGINS,
 	}),
 );
 

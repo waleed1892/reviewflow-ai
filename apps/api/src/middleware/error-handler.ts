@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { isHttpError } from "http-errors";
 import { StatusCodes } from "http-status-codes";
+import { env } from "@/utils/env";
 import { logger } from "@/utils/logger";
 
 export const globalErrorHandler = (
@@ -23,7 +24,7 @@ export const globalErrorHandler = (
 		error: {
 			code: "INTERNAL_SERVER_ERROR",
 			message:
-				process.env.NODE_ENV === "production"
+				env.NODE_ENV === "production"
 					? "An internal server error occurred"
 					: err.message,
 		},
