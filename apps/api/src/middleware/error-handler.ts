@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { isHttpError } from "http-errors";
 import { StatusCodes } from "http-status-codes";
+import { logger } from "../utils/logger.js";
 
 export const globalErrorHandler = (
 	err: Error,
@@ -8,14 +9,15 @@ export const globalErrorHandler = (
 	res: Response,
 ) => {
 	if (isHttpError(err)) {
-		res.status(err.statusCode).json({
+		return res.status(err.statusCode).json({
 			message: err.message,
 		});
 	}
 
 	// Unexpected runtime crashes (500)
-	console.error("🔥 Unexpected System Crash:", err);
-	res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+	logger.error({ err }, "🔥 Unexpected System Crash");
+
+	return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
 		success: false,
 		error: {
 			code: "INTERNAL_SERVER_ERROR",

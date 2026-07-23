@@ -50,15 +50,15 @@ app.use((_, res) => {
 app.use(globalErrorHandler);
 
 const server = app.listen(port, () => {
-	console.log(`App started on port:${port}`);
+	logger.info(`🚀 API server running on port: ${port}`);
 });
 
 const gracefulShutdown = (signal: string) => {
-	console.log(
+	console.info(
 		`\n⚠️  Received ${signal}. Shutting down HTTP server gracefully...`,
 	);
 	server.close(() => {
-		console.log("✅ HTTP server closed. Process exiting cleanly.");
+		console.info("✅ HTTP server closed. Process exiting cleanly.");
 		process.exit(0);
 	});
 };
