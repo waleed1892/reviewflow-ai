@@ -1,4 +1,3 @@
-import { prisma } from "@reviewflow/database";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
@@ -7,6 +6,7 @@ import { pinoHttp } from "pino-http";
 import { globalErrorHandler } from "@/middleware/error-handler";
 import { globalRateLimiter } from "@/middleware/rate-limitter";
 import { logger } from "@/utils/logger";
+import { mainRouter } from "./router";
 import { env } from "./utils/env";
 
 const app = express();
@@ -30,18 +30,7 @@ app.use(
 );
 app.use(globalRateLimiter);
 
-app.get(`/api/health`, async (_, res) => {
-	const userCount = await prisma.user.count();
-	res.status(StatusCodes.OK).json({
-		status: "UP",
-		uptime: process.uptime(),
-		timestamp: new Date(),
-		memory: process.memoryUsage(),
-		message: "Server is running normally",
-		database: "Connected",
-		userCount: userCount,
-	});
-});
+app.use("/api/v1", mainRouter);
 
 app.use((_, res) => {
 	res.status(StatusCodes.NOT_FOUND).json({
