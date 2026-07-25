@@ -1,3 +1,4 @@
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
@@ -19,6 +20,7 @@ app.use(
 		origin: env.ALLOWED_ORIGINS,
 	}),
 );
+app.use(cookieParser());
 
 app.use(pinoHttp({ logger }));
 

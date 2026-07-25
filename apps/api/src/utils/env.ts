@@ -14,6 +14,13 @@ const envSchema = z.object({
 	),
 	ALLOWED_ORIGINS: z.string().default("http://localhost:3000"),
 	LOG_LEVEL: z.enum(["info", "debug", "warn", "error"]).default("info"),
+	JWT_ISSUER: z.string().default("reviewflow-api"),
+	JWT_AUDIENCE: z.string().default("reviewflow-web"),
+	JWT_ACCESS_EXPIRATION: z.string().default("10m"),
+	REFRESH_TOKEN_EXPIRATION: z.coerce.number().default(7),
+	JWT_SECRET: z
+		.string()
+		.min(32, "JWT_SECRET must be at least 32 characters long"),
 });
 
 const _env = envSchema.safeParse(process.env);

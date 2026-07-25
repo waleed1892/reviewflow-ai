@@ -4,7 +4,7 @@ import { healthController } from "./health.controller";
 
 const router: ExpressRouter = Router();
 
-router.get("/health", healthController.getLiveness);
+router.get("/", healthController.getLiveness);
 router.get("/readiness", healthController.getReadiness);
 
 export { router as healthRouter };
