@@ -1,7 +1,13 @@
-import type { Organization, OrganizationMember, User } from "@reviewflow/database";
+import type {
+	Organization,
+	OrganizationMember,
+	User,
+} from "@reviewflow/database";
 import { organizationMemberSerializer } from "./organization-member.serializer";
 
-type MemberWithUser = OrganizationMember & { user?: Omit<User, "password_hash"> };
+type MemberWithUser = OrganizationMember & {
+	user?: Omit<User, "password_hash">;
+};
 
 export const organizationSerializer = (
 	organization: Organization & {
