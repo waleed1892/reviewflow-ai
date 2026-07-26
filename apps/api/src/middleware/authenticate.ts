@@ -30,7 +30,7 @@ export async function authenticate(
 			where: { id: sid },
 		});
 
-		if (!session || session.isRevoked || session.expiresAt < new Date()) {
+		if (!session || session.is_revoked || session.expires_at < new Date()) {
 			throw createError.Unauthorized("Session has been revoked or expired");
 		}
 

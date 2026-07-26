@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -20,43 +15,43 @@ enum Role {
 }
 
 model User {
-  id              String               @id @default(uuid())
-  email           String               @unique
-  passwordHash    String               @map("password_hash")
-  name            String
-  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt       DateTime             @updatedAt @map("updated_at")
-  memberships     OrgainzationMember[]
-  refreshSessions RefreshSession[]
+  id               String               @id @default(uuid())
+  email            String               @unique
+  password_hash    String
+  name             String
+  created_at       DateTime             @default(now()) @db.Timestamptz()
+  updated_at       DateTime             @updatedAt @db.Timestamptz()
+  memberships      OrganizationMember[]
+  refresh_sessions RefreshSession[]
 
   @@map("users")
 }
 
 model Organization {
-  id        String               @id @default(uuid())
-  name      String
-  slug      String               @unique
-  createdAt DateTime             @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt DateTime             @updatedAt @map("updated_at")
-  members   OrgainzationMember[]
-  documents Document[]
+  id         String               @id @default(uuid())
+  name       String
+  slug       String               @unique
+  created_at DateTime             @default(now()) @db.Timestamptz()
+  updated_at DateTime             @updatedAt @db.Timestamptz()
+  members    OrganizationMember[]
+  documents  Document[]
 
   @@map("organizations")
 }
 
-model OrgainzationMember {
-  id             String   @id @default(uuid())
-  userId         String   @map("user_id")
-  organizationId String   @map("organization_id")
-  role           Role
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt      DateTime @updatedAt @map("updated_at")
+model OrganizationMember {
+  id              String   @id @default(uuid())
+  user_id         String
+  organization_id String
+  role            Role
+  created_at      DateTime @default(now()) @db.Timestamptz()
+  updated_at      DateTime @updatedAt @db.Timestamptz()
 
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
 
-  @@unique([userId, organizationId])
-  @@index([organizationId])
+  @@unique([user_id, organization_id])
+  @@index([organization_id])
   @@map("organization_members")
 }
 
@@ -69,51 +64,51 @@ enum DocumentStatus {
 }
 
 model Document {
-  id             String         @id @default(uuid())
-  title          String
-  status         DocumentStatus
-  organizationId String         @map("organization_id")
-  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt      DateTime       @updatedAt @map("updated_at")
+  id              String            @id @default(uuid())
+  title           String
+  status          DocumentStatus
+  organization_id String
+  created_at      DateTime          @default(now()) @db.Timestamptz()
+  updated_at      DateTime          @updatedAt @db.Timestamptz()
 
-  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  documentVersions DocumentVersion[]
+  organization      Organization      @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  document_versions DocumentVersion[]
 
-  @@index([organizationId])
+  @@index([organization_id])
   @@map("documents")
 }
 
 model DocumentVersion {
-  id            String   @id @default(uuid())
-  documentId    String   @map("document_id")
-  versionNumber Int      @map("version_number")
-  storagePath   String   @map("storage_path")
-  sizeBytes     BigInt   @map("size_bytes")
-  mimeType      String   @map("mime_type")
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id             String   @id @default(uuid())
+  document_id     String
+  version_number Int
+  storage_path    String
+  size_bytes     BigInt
+  mime_type      String
+  created_at     DateTime @default(now()) @db.Timestamptz()
+  updated_at     DateTime @updatedAt @db.Timestamptz()
 
-  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  document Document @relation(fields: [document_id], references: [id], onDelete: Cascade)
 
-  @@unique([documentId, id])
+  @@unique([document_id, id])
   @@map("document_versions")
 }
 
 model RefreshSession {
-  id                  String   @id @default(uuid())
-  userId              String   @map("user_id")
-  hashedToken         String   @unique @map("hashed_token")
-  familyId            String   @map("family_id")
-  isRevoked           Boolean  @default(false) @map("is_revoked")
-  expiresAt           DateTime @map("expires_at") @db.Timestamptz()
-  replacedBySessionId String?  @map("replaced_by_session_id")
-  userAgent           String?  @map("user_agent")
-  ipAddress           String?  @map("ip_address")
-  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt           DateTime @updatedAt @map("updated_at")
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                     String   @id @default(uuid())
+  user_id                String
+  hashed_token           String   @unique
+  family_id              String
+  is_revoked             Boolean  @default(false)
+  expires_at             DateTime @db.Timestamptz()
+  replaced_by_session_id String?
+  user_agent             String?
+  ip_address             String?
+  created_at             DateTime @default(now()) @db.Timestamptz()
+  updated_at             DateTime @updatedAt @db.Timestamptz()
+  user                   User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@index([userId])
-  @@index([familyId])
+  @@index([user_id])
+  @@index([family_id])
   @@map("refresh_sessions")
 }

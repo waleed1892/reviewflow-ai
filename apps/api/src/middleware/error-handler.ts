@@ -1,3 +1,4 @@
+import { Prisma } from "@reviewflow/database";
 import type { NextFunction, Request, Response } from "express";
 import { isHttpError } from "http-errors";
 import { StatusCodes } from "http-status-codes";
@@ -24,7 +25,20 @@ export const globalErrorHandler = (
 		});
 	}
 
-	// 2. Handle HTTP Errors (401 Unauthorized, 409 Conflict, etc.)
+	// 2. Handle Prisma Database Errors (P2025: Record Not Found)
+	if (err instanceof Prisma.PrismaClientKnownRequestError) {
+		if (err.code === "P2025") {
+			return res.status(StatusCodes.NOT_FOUND).json({
+				success: false,
+				error: {
+					code: "NOT_FOUND",
+					message: "Requested record not found",
+				},
+			});
+		}
+	}
+
+	// 3. Handle HTTP Errors (401 Unauthorized, 409 Conflict, etc.)
 	if (isHttpError(err)) {
 		return res.status(err.statusCode).json({
 			success: false,
@@ -35,7 +49,7 @@ export const globalErrorHandler = (
 		});
 	}
 
-	// 3. Unexpected System Crashes (500)
+	// 4. Unexpected System Crashes (500)
 	logger.error({ err }, "🔥 Unexpected System Crash");
 
 	return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

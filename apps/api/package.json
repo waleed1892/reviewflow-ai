@@ -15,8 +15,8 @@
 	"license": "GPL-3.0-only",
 	"packageManager": "pnpm@10.10.0",
 	"dependencies": {
-		"@reviewflow/database": "workspace:*",
 		"@reviewflow-ai/shared": "workspace:*",
+		"@reviewflow/database": "workspace:*",
 		"argon2": "^0.45.1",
 		"cookie-parser": "^1.4.7",
 		"cors": "^2.8.6",
@@ -29,6 +29,7 @@
 		"jose": "^6.2.4",
 		"pino": "^10.3.1",
 		"pino-http": "^11.0.0",
+		"slugify": "^1.6.9",
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {

@@ -1,4 +1,3 @@
-import { prisma } from "./lib/prisma";
-import { getTenantClient } from "./lib/tenant-extension";
-
-export { getTenantClient, prisma };
+export * from "./generated/prisma/client";
+export * from "./lib/prisma";
+export * from "./lib/tenant-extension";

@@ -2,16 +2,16 @@ import type { Response } from "express";
 import { AUTH_COOKIES, COOKIE_OPTIONS } from "../auth.constants";
 
 export interface AuthTokens {
-	accessToken: string;
-	refreshToken: string;
+	access_token: string;
+	refresh_token: string;
 }
 
 /**
  * Sets both access_token and refresh_token HttpOnly cookies on the HTTP response.
  */
 export function setAuthCookies(res: Response, tokens: AuthTokens): void {
-	res.cookie(AUTH_COOKIES.ACCESS_TOKEN, tokens.accessToken, COOKIE_OPTIONS);
-	res.cookie(AUTH_COOKIES.REFRESH_TOKEN, tokens.refreshToken, COOKIE_OPTIONS);
+	res.cookie(AUTH_COOKIES.ACCESS_TOKEN, tokens.access_token, COOKIE_OPTIONS);
+	res.cookie(AUTH_COOKIES.REFRESH_TOKEN, tokens.refresh_token, COOKIE_OPTIONS);
 }
 
 /**

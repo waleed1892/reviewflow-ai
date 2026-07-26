@@ -2,6 +2,8 @@ import { prisma } from "@reviewflow/database";
 import type { LoginInput, RegisterInput } from "@reviewflow-ai/shared";
 import createHttpError from "http-errors";
 import { env } from "@/utils/env";
+import { organizationService as orgService } from "../organization/organization.service";
+import { userRepository as userRepo } from "../user/user.repository";
 import { hashPassword, verifyPassword } from "./utils/password";
 import {
 	generateAccessToken,
@@ -15,41 +17,53 @@ export interface AuthMeta {
 }
 
 export class AuthService {
-	constructor(private readonly db = prisma) {}
+	constructor(
+		private readonly db = prisma,
+		private readonly organizationService = orgService,
+		private readonly userRepository = userRepo,
+	) {}
 
 	public register = async (data: RegisterInput) => {
-		const existingUser = await this.db.user.findUnique({
-			where: {
-				email: data.email,
-			},
+		return this.db.$transaction(async (tx) => {
+			const existingUser = await tx.user.findUnique({
+				where: {
+					email: data.email,
+				},
+			});
+
+			if (existingUser) {
+				throw createHttpError.Conflict("User already exists");
+			}
+
+			const passwordHash = await hashPassword(data.password);
+
+			const user = await tx.user.create({
+				data: {
+					name: data.name,
+					email: data.email,
+					password_hash: passwordHash,
+				},
+			});
+
+			const { organization, member } =
+				await this.organizationService.createOrganization(tx, {
+					name: data.name,
+					userId: user.id,
+				});
+
+			return {
+				user,
+				organization,
+				member,
+			};
 		});
-
-		if (existingUser) {
-			throw createHttpError.Conflict("User already exists");
-		}
-
-		const passwordHash = await hashPassword(data.password);
-
-		const user = await this.db.user.create({
-			data: {
-				name: data.name,
-				email: data.email,
-				passwordHash,
-			},
-		});
-
-		return user;
 	};
 
 	public login = async (data: LoginInput, meta: AuthMeta) => {
-		const user = await this.db.user.findUniqueOrThrow({
-			where: {
-				email: data.email,
-			},
-		});
+		const user = await this.userRepository.findByEmailForLogin(data.email);
 
 		const isPasswordValid = await verifyPassword(
-			user.passwordHash,
+			user.password_hash,
 			data.password,
 		);
 
@@ -57,33 +71,33 @@ export class AuthService {
 			throw createHttpError.Unauthorized("Invalid email or password");
 		}
 
-		// 1. Generate Opaque Refresh Token & Cryptographic Family ID
 		const rawRefreshToken = generateOpaqueToken();
 		const hashedRefreshToken = hashToken(rawRefreshToken);
 		const familyId = crypto.randomUUID();
 		const expiresAt = new Date(
 			Date.now() + env.REFRESH_TOKEN_EXPIRATION * 24 * 60 * 60 * 1000,
 		);
-		// 2. Persist RefreshSession in PostgreSQL
+
 		const session = await this.db.refreshSession.create({
 			data: {
-				userId: user.id,
-				hashedToken: hashedRefreshToken,
-				familyId,
-				expiresAt,
-				userAgent: meta.userAgent || null,
-				ipAddress: meta.ipAddress || null,
+				user_id: user.id,
+				hashed_token: hashedRefreshToken,
+				family_id: familyId,
+				expires_at: expiresAt,
+				user_agent: meta.userAgent || null,
+				ip_address: meta.ipAddress || null,
 			},
 		});
-		// 3. Issue Short-Lived JWT Access Token
+
 		const accessToken = await generateAccessToken({
 			sub: user.id,
 			sid: session.id,
 		});
+
 		return {
-			user: { id: user.id, name: user.name, email: user.email },
-			accessToken,
-			refreshToken: rawRefreshToken,
+			user: user,
+			access_token: accessToken,
+			refresh_token: rawRefreshToken,
 		};
 	};
 
@@ -93,7 +107,7 @@ export class AuthService {
 				id: sessionId,
 			},
 			data: {
-				isRevoked: true,
+				is_revoked: true,
 			},
 		});
 	};
@@ -101,10 +115,10 @@ export class AuthService {
 	public logoutAll = async (userId: string) => {
 		await this.db.refreshSession.updateMany({
 			where: {
-				userId: userId,
+				user_id: userId,
 			},
 			data: {
-				isRevoked: true,
+				is_revoked: true,
 			},
 		});
 	};
@@ -114,17 +128,16 @@ export class AuthService {
 
 		const session = await this.db.refreshSession.findUniqueOrThrow({
 			where: {
-				hashedToken: hashedRefreshToken,
+				hashed_token: hashedRefreshToken,
 			},
 		});
 
-		if (!session || session.isRevoked || session.expiresAt < new Date()) {
-			if (session) {
-				await this.db.refreshSession.updateMany({
-					where: { familyId: session.familyId, isRevoked: false },
-					data: { isRevoked: true },
-				});
-			}
+		if (session.is_revoked || session.expires_at < new Date()) {
+			await this.db.refreshSession.updateMany({
+				where: { family_id: session.family_id, is_revoked: false },
+				data: { is_revoked: true },
+			});
+
 			throw createHttpError.Unauthorized("Invalid refresh token");
 		}
 
@@ -136,34 +149,34 @@ export class AuthService {
 
 		await this.db.refreshSession.update({
 			where: { id: session.id },
-			data: { isRevoked: true },
+			data: { is_revoked: true },
 		});
 
 		const newSession = await this.db.refreshSession.create({
 			data: {
-				userId: session.userId,
-				hashedToken: newHashedRefreshToken,
-				familyId: session.familyId,
-				expiresAt,
-				replacedBySessionId: session.id,
-				userAgent: meta.userAgent || null,
-				ipAddress: meta.ipAddress || null,
+				user_id: session.user_id,
+				hashed_token: newHashedRefreshToken,
+				family_id: session.family_id,
+				expires_at: expiresAt,
+				replaced_by_session_id: session.id,
+				user_agent: meta.userAgent || null,
+				ip_address: meta.ipAddress || null,
 			},
 		});
 
 		const user = await this.db.user.findUniqueOrThrow({
-			where: { id: session.userId },
+			where: { id: session.user_id },
 		});
 
 		const newAccessToken = await generateAccessToken({
-			sub: session.userId,
+			sub: session.user_id,
 			sid: newSession.id,
 		});
 
 		return {
-			accessToken: newAccessToken,
-			refreshToken: newRawRefreshToken,
-			user,
+			access_token: newAccessToken,
+			refresh_token: newRawRefreshToken,
+			user: user,
 		};
 	};
 

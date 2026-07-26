@@ -1,7 +1,13 @@
 import { loginSchema, registerSchema } from "@reviewflow-ai/shared";
 import type { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import { userSerializer } from "@/modules/user/user.serializer";
+import { sendErrorResponse, sendSuccessResponse } from "@/utils/response";
 import { AUTH_COOKIES } from "./auth.constants";
+import {
+	serializeLoginResponse,
+	serializeRegisterResponse,
+} from "./auth.serializer";
 import { authService } from "./auth.service";
 import { clearAuthCookies, setAuthCookies } from "./utils/cookies";
 import { getAuthMeta } from "./utils/meta";
@@ -12,8 +18,13 @@ export class AuthController {
 
 	public register = async (req: Request, res: Response) => {
 		const body = registerSchema.parse(req.body);
-		const user = await this.service.register(body);
-		res.status(StatusCodes.CREATED).json({ data: user });
+		const result = await this.service.register(body);
+
+		sendSuccessResponse(
+			res,
+			serializeRegisterResponse(result),
+			StatusCodes.CREATED,
+		);
 	};
 
 	public login = async (req: Request, res: Response) => {
@@ -22,7 +33,7 @@ export class AuthController {
 
 		setAuthCookies(res, result);
 
-		res.status(StatusCodes.OK).json({ data: { user: result.user } });
+		sendSuccessResponse(res, serializeLoginResponse(result));
 	};
 
 	public me = async (req: Request, res: Response) => {
@@ -30,22 +41,24 @@ export class AuthController {
 
 		const user = await this.service.me(authUser.id);
 
-		res.status(StatusCodes.OK).json({ data: user });
+		sendSuccessResponse(res, userSerializer(user));
 	};
 
 	public refreshToken = async (req: Request, res: Response) => {
 		const refreshToken = req.cookies?.[AUTH_COOKIES.REFRESH_TOKEN];
 		if (!refreshToken) {
-			return res
-				.status(StatusCodes.UNAUTHORIZED)
-				.json({ message: "Refresh token missing" });
+			return sendErrorResponse(
+				res,
+				"Refresh token missing",
+				StatusCodes.UNAUTHORIZED,
+			);
 		}
 
 		const result = await this.service.refresh(refreshToken, getAuthMeta(req));
 
 		setAuthCookies(res, result);
 
-		res.status(StatusCodes.OK).json({ data: { user: result.user } });
+		sendSuccessResponse(res, { user: result.user });
 	};
 
 	public logout = async (req: Request, res: Response) => {
@@ -53,9 +66,7 @@ export class AuthController {
 		await this.service.logout(user.sid);
 		clearAuthCookies(res);
 
-		res.status(StatusCodes.OK).json({
-			message: "Logged out successfully",
-		});
+		sendSuccessResponse(res, { message: "Logged out successfully" });
 	};
 
 	public logoutAll = async (req: Request, res: Response) => {
@@ -63,7 +74,7 @@ export class AuthController {
 		await this.service.logoutAll(user.id);
 		clearAuthCookies(res);
 
-		res.status(StatusCodes.OK).json({
+		sendSuccessResponse(res, {
 			message: "Logged out all devices successfully",
 		});
 	};
