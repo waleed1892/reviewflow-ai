@@ -1,5 +1,11 @@
 import crypto from "node:crypto";
 import { type JWTPayload, jwtVerify, SignJWT } from "jose";
+import {
+	JWSSignatureVerificationFailed,
+	JWTClaimValidationFailed,
+	JWTExpired,
+	JWTInvalid,
+} from "jose/errors";
 import { env } from "@/utils/env";
 
 interface AccessTokenPayload {
@@ -28,13 +34,34 @@ export const generateAccessToken = async (
 };
 
 export const verifyAccessToken = async (token: string): Promise<JWTPayload> => {
-	const { payload } = await jwtVerify(token, secretKey, {
-		issuer: env.JWT_ISSUER,
-		audience: env.JWT_AUDIENCE,
-		algorithms: ["HS256"],
-	});
+	try {
+		const { payload } = await jwtVerify(token, secretKey, {
+			issuer: env.JWT_ISSUER,
+			audience: env.JWT_AUDIENCE,
+			algorithms: ["HS256"],
+		});
 
-	return payload;
+		return payload;
+	} catch (err) {
+		if (err instanceof JWTExpired) {
+			throw new JWTExpired("Token has expired", err.payload);
+		}
+		if (err instanceof JWSSignatureVerificationFailed) {
+			throw new JWSSignatureVerificationFailed("Invalid token signature");
+		}
+		if (err instanceof JWTClaimValidationFailed) {
+			throw new JWTClaimValidationFailed(
+				"Token validation failed",
+				err.payload,
+				err.claim,
+				err.reason,
+			);
+		}
+		if (err instanceof JWTInvalid) {
+			throw new JWTInvalid("Malformed token");
+		}
+		throw err;
+	}
 };
 
 export function generateOpaqueToken(): string {
