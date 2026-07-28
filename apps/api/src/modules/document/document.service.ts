@@ -3,7 +3,6 @@ import type {
 	CreateDocumentInput,
 	UpdateDocumentInput,
 } from "@reviewflow-ai/shared";
-import createHttpError from "http-errors";
 
 export class DocumentService {
 	constructor(private readonly db = tenantPrisma) {}
