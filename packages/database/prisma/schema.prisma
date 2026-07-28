@@ -15,7 +15,7 @@ enum Role {
 }
 
 model User {
-  id               String               @id @default(uuid())
+  id               String               @id @default(uuid()) @db.Uuid
   email            String               @unique
   password_hash    String
   name             String
@@ -28,7 +28,7 @@ model User {
 }
 
 model Organization {
-  id         String               @id @default(uuid())
+  id         String               @id @default(uuid()) @db.Uuid
   name       String
   slug       String               @unique
   created_at DateTime             @default(now()) @db.Timestamptz()
@@ -40,9 +40,9 @@ model Organization {
 }
 
 model OrganizationMember {
-  id              String   @id @default(uuid())
-  user_id         String
-  organization_id String
+  id              String   @id @default(uuid()) @db.Uuid
+  user_id         String   @db.Uuid
+  organization_id String   @db.Uuid
   role            Role
   created_at      DateTime @default(now()) @db.Timestamptz()
   updated_at      DateTime @updatedAt @db.Timestamptz()
@@ -64,12 +64,12 @@ enum DocumentStatus {
 }
 
 model Document {
-  id              String            @id @default(uuid())
+  id              String         @id @default(uuid()) @db.Uuid
   title           String
   status          DocumentStatus
-  organization_id String
-  created_at      DateTime          @default(now()) @db.Timestamptz()
-  updated_at      DateTime          @updatedAt @db.Timestamptz()
+  organization_id String         @db.Uuid
+  created_at      DateTime       @default(now()) @db.Timestamptz()
+  updated_at      DateTime       @updatedAt @db.Timestamptz()
 
   organization      Organization      @relation(fields: [organization_id], references: [id], onDelete: Cascade)
   document_versions DocumentVersion[]
@@ -79,10 +79,10 @@ model Document {
 }
 
 model DocumentVersion {
-  id             String   @id @default(uuid())
-  document_id     String
+  id             String   @id @default(uuid()) @db.Uuid
+  document_id    String   @db.Uuid
   version_number Int
-  storage_path    String
+  storage_path   String
   size_bytes     BigInt
   mime_type      String
   created_at     DateTime @default(now()) @db.Timestamptz()
@@ -95,13 +95,13 @@ model DocumentVersion {
 }
 
 model RefreshSession {
-  id                     String   @id @default(uuid())
-  user_id                String
+  id                     String   @id @default(uuid()) @db.Uuid
+  user_id                String   @db.Uuid
   hashed_token           String   @unique
-  family_id              String
+  family_id              String   @db.Uuid
   is_revoked             Boolean  @default(false)
   expires_at             DateTime @db.Timestamptz()
-  replaced_by_session_id String?
+  replaced_by_session_id String? @db.Uuid
   user_agent             String?
   ip_address             String?
   created_at             DateTime @default(now()) @db.Timestamptz()

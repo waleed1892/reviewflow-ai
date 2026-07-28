@@ -11,8 +11,8 @@ ALTER TABLE organization_members FORCE ROW LEVEL SECURITY;
 
 CREATE POLICY member_isolation ON organization_members
     FOR ALL
-    USING (organization_id = current_setting('app.organization_id',true))
-    WITH CHECK (organization_id = current_setting('app.organization_id',true));
+    USING (organization_id = NULLIF(current_setting('app.organization_id', true), '')::uuid)
+    WITH CHECK (organization_id = NULLIF(current_setting('app.organization_id', true), '')::uuid);
 
 -- ---------------------------------------------------------
 -- 2. DOCUMENTS TABLE
@@ -22,5 +22,5 @@ ALTER TABLE documents FORCE ROW LEVEL SECURITY;
 
 CREATE POLICY document_isolation ON documents
     FOR ALL
-    USING (organization_id = current_setting('app.organization_id',true))
-    WITH CHECK (organization_id = current_setting('app.organization_id',true));
+    USING (organization_id = NULLIF(current_setting('app.organization_id', true), '')::uuid)
+    WITH CHECK (organization_id = NULLIF(current_setting('app.organization_id', true), '')::uuid);

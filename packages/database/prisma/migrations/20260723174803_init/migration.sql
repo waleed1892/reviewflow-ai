@@ -6,7 +6,7 @@ CREATE TYPE "DocumentStatus" AS ENUM ('UPLOADED', 'QUEUED', 'PROCESSING', 'READY
 
 -- CreateTable
 CREATE TABLE "users" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "email" TEXT NOT NULL,
     "password_hash" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE "users" (
 
 -- CreateTable
 CREATE TABLE "organizations" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
@@ -29,9 +29,9 @@ CREATE TABLE "organizations" (
 
 -- CreateTable
 CREATE TABLE "organization_members" (
-    "id" TEXT NOT NULL,
-    "user_id" TEXT NOT NULL,
-    "organization_id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "user_id" UUID NOT NULL,
+    "organization_id" UUID NOT NULL,
     "role" "Role" NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -41,10 +41,10 @@ CREATE TABLE "organization_members" (
 
 -- CreateTable
 CREATE TABLE "documents" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "title" TEXT NOT NULL,
     "status" "DocumentStatus" NOT NULL,
-    "organization_id" TEXT NOT NULL,
+    "organization_id" UUID NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -53,8 +53,8 @@ CREATE TABLE "documents" (
 
 -- CreateTable
 CREATE TABLE "document_versions" (
-    "id" TEXT NOT NULL,
-    "document_id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "document_id" UUID NOT NULL,
     "version_number" INTEGER NOT NULL,
     "storage_path" TEXT NOT NULL,
     "size_bytes" BIGINT NOT NULL,

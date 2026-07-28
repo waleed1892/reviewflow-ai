@@ -1,12 +1,12 @@
 -- CreateTable
 CREATE TABLE "refresh_sessions" (
-    "id" TEXT NOT NULL,
-    "user_id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "user_id" UUID NOT NULL,
     "hashed_token" TEXT NOT NULL,
-    "family_id" TEXT NOT NULL,
+    "family_id" UUID NOT NULL,
     "is_revoked" BOOLEAN NOT NULL DEFAULT false,
     "expires_at" TIMESTAMPTZ NOT NULL,
-    "replaced_by_session_id" TEXT,
+    "replaced_by_session_id" UUID,
     "user_agent" TEXT,
     "ip_address" TEXT,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
