@@ -37,7 +37,11 @@ export async function authenticate(
 		req.user = { id: sub, sid };
 
 		next();
-	} catch {
-		next(createError.Unauthorized("Invalid or expired authentication token"));
+	} catch (err) {
+		if (err instanceof Error) {
+			next(createError.Unauthorized(err.message));
+		} else {
+			next(createError.Unauthorized("Invalid authentication token"));
+		}
 	}
 }

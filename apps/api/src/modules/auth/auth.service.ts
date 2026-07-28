@@ -63,8 +63,8 @@ export class AuthService {
 		const user = await this.userRepository.findByEmailForLogin(data.email);
 
 		const isPasswordValid = await verifyPassword(
-			user.password_hash,
 			data.password,
+			user.password_hash,
 		);
 
 		if (!isPasswordValid) {

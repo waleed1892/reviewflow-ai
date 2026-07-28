@@ -12,7 +12,9 @@ const secretKey = new TextEncoder().encode(env.JWT_SECRET);
 export const generateAccessToken = async (
 	payload: AccessTokenPayload,
 ): Promise<string> => {
-	return new SignJWT()
+	return new SignJWT({
+		sid: payload.sid,
+	})
 		.setProtectedHeader({
 			alg: "HS256",
 		})

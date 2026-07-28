@@ -8,10 +8,8 @@ const router: ExpressRouter = Router();
 router.post("/login", authController.login);
 router.post("/register", authController.register);
 
-router.use(authenticate);
-
-router.post("/refresh", authController.refreshToken);
-router.post("/logout", authController.logout);
-router.post("/logout/all", authController.logoutAll);
+router.post("/refresh", authenticate, authController.refreshToken);
+router.post("/logout", authenticate, authController.logout);
+router.post("/logout/all", authenticate, authController.logoutAll);
 
 export { router as authRouter };
