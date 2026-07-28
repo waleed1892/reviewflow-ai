@@ -25,14 +25,25 @@ export const globalErrorHandler = (
 		});
 	}
 
-	// 2. Handle Prisma Database Errors (P2025: Record Not Found)
+	// 2. Handle Prisma Database Errors
 	if (err instanceof Prisma.PrismaClientKnownRequestError) {
+		// P2025: Record Not Found
 		if (err.code === "P2025") {
 			return res.status(StatusCodes.NOT_FOUND).json({
 				success: false,
 				error: {
 					code: "NOT_FOUND",
 					message: "Requested record not found",
+				},
+			});
+		}
+		// RLS violation (PostgreSQL error 42501)
+		if (err.message.includes("row-level security")) {
+			return res.status(StatusCodes.FORBIDDEN).json({
+				success: false,
+				error: {
+					code: "FORBIDDEN",
+					message: "You do not have permission to perform this action",
 				},
 			});
 		}

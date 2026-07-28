@@ -1,3 +1,20 @@
+-- =========================================================
+-- APP USER (non-superuser, for RLS to work)
+-- Prisma connects as this role so PostgreSQL RLS is enforced.
+-- Superusers bypass RLS, so the app MUST NOT connect as one.
+-- =========================================================
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'app_user') THEN
+    CREATE ROLE app_user WITH LOGIN PASSWORD 'app_user_password';
+  END IF;
+  EXECUTE format('GRANT CONNECT ON DATABASE %I TO app_user', current_database());
+  GRANT USAGE ON SCHEMA public TO app_user;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;
+  ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_user;
+END
+$$;
+
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('OWNER', 'ADMIN', 'REVIEWER', 'MEMBER');
 
