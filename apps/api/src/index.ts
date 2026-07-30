@@ -1,3 +1,4 @@
+import { redisClient } from "@reviewflow-ai/redis";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
@@ -13,6 +14,17 @@ import { env } from "./utils/env";
 const app = express();
 
 const port = env.PORT;
+
+redisClient
+	.connect()
+	.then(() => {
+		logger.info("✅ Redis connected successfully");
+	})
+	.catch(() => {
+		logger.warn(
+			"⚠️ Redis failed to connect during boot. Operating in fail-open mode:",
+		);
+	});
 
 app.use(helmet());
 app.use(
@@ -46,12 +58,15 @@ const server = app.listen(port, () => {
 	logger.info(`🚀 API server running on port: ${port}`);
 });
 
-const gracefulShutdown = (signal: string) => {
+const gracefulShutdown = async (signal: string) => {
 	console.info(
 		`\n⚠️  Received ${signal}. Shutting down HTTP server gracefully...`,
 	);
-	server.close(() => {
-		console.info("✅ HTTP server closed. Process exiting cleanly.");
+	server.close(async () => {
+		await redisClient.disconnect();
+		console.info(
+			"✅ HTTP server and Redis client closed. Process exiting cleanly.",
+		);
 		process.exit(0);
 	});
 };

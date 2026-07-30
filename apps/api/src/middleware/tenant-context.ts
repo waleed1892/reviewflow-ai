@@ -16,6 +16,8 @@ export async function withTenantContext(
 			);
 		}
 
+		req.organizationId = organizationId;
+
 		orgContext.run(organizationId, next);
 	} catch (error) {
 		next(error);

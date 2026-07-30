@@ -12,6 +12,7 @@ const envSchema = z.object({
 	DATABASE_URL: z.url(
 		"DATABASE_URL must be a valid PostgreSQL connection string",
 	),
+	REDIS_URL: z.string().default("redis://localhost:6379"),
 	ALLOWED_ORIGINS: z.string().default("http://localhost:3000"),
 	LOG_LEVEL: z.enum(["info", "debug", "warn", "error"]).default("info"),
 	JWT_ISSUER: z.string().default("reviewflow-api"),
